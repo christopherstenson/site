@@ -109,11 +109,11 @@
           type : fs_types.link,
           val : "minecraft/map"
         },
-{
-        name: "oldmc",
-        type: fs_types.link,
-        val: "minecraft/map2"
-},
+        {
+          name: "oldmc",
+          type: fs_types.link,
+          val: "minecraft/map2"
+        },
         {
           name : "projects",
           type : fs_types.link,
@@ -207,6 +207,32 @@
             return out;
           },
           man: "Dumps the contents of the specified file(s) to the output buffer."
+        },
+
+        "cd" : {
+          output : function(args) {
+            var dir = args[1];
+            var out;
+
+            for (var i = 0, lim = fs.length, file; i < lim; i++)
+            {
+              file = fs[i];
+              if (file.type === fs_types.link && dir === file.name)
+              {
+                // We have the link we want
+                window.location.href = file.val;
+                return;
+              }
+              else if (file.type === fs_types.file && dir === file.name)
+              {
+                out = "cd: not a directory: " + dir;
+              }
+            }
+
+            return out ? out : "cd: no such file or directory: " + dir;
+          },
+
+          man: "Builtin command to change the current directory."
         },
 
         "man" : {
