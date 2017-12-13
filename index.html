@@ -1,0 +1,328 @@
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta property="og:url" content="https://chrisstenson.com">
+      <meta property="og:type" content="website" />
+      <meta name="description" property="og:description" content="Chris Stenson">
+      <meta name="twitter:creator" content="@SerebroRaya">
+      <meta name="twitter:site" content="@SerebroRaya">
+
+      <title>Chris Stenson</title>
+
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+      <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+      <style>
+        html {
+          background: url(img/bg.jpg) no-repeat center center fixed;
+          background-size: cover;
+        }
+        body {
+          font-size: 12px;
+          font-family: Inconsolata, Courier, monospace;
+          background: none;
+        }
+        .console {
+          margin: 25px;
+          background-color: #292929;
+          color: #d6d6d6;
+          border-radius: 5px;
+          padding: 15px;
+          height: 400px;
+          box-shadow: 0px 0px 30px rgba(0,0,0,0.5);
+          -webkit-box-shadow: 0px 0px 30px rgba(0,0,0,0.5);
+          -moz-box-shadow: 0px 0px 30px rgba(0,0,0,0.5);
+        }
+        #output {
+          max-height: 355px;
+          overflow-y: scroll;
+          white-space: pre-wrap;
+        }
+        .prompt {
+          color: #a8d4a9;
+        }
+        .location {
+          color: #78aad6;
+        }
+        .active-prompt-container {
+          display: flex;
+          justify-content: space-between;
+        }
+        .active-prompt {
+          background: none;
+          border: none;
+          width: 100%;
+          margin-top: -1px;
+        }
+        input.active-prompt:focus{
+          outline: none;
+        }
+        .input {
+          padding: 20px;
+        }
+        .form-control {
+          margin-bottom: 20px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container"><div class="row">
+        <div class="console col-xs-10 col-sm-8 col-md-6 col-lg-6">
+          <div id="output"></div>
+          <div class="active-prompt-container"><span
+                          class="prompt">visitor@chrisstenson.com</span>:<span
+                          class="prompt location">~</span>$&nbsp;<input
+                          id="active-prompt" class="active-prompt" type="text" 
+                          autofocus/></div>
+        </div>
+      </div></div>
+    </body>
+
+    <script>
+      $(document).ready(function() {
+        for(var i = 0, lim = init.length; i < lim; i++)
+        {
+          prompt(init[i]);
+        }
+
+        $('#active-prompt').keydown(function(event) {
+                promptOnKey(event);
+        });
+      });
+
+      var fs_types = {
+        link: {id: 0, name: "LINK"},
+        file: {id: 1, name: "FILE"}
+      }
+
+      var fs = [
+        {
+          name : "blog",
+          type : fs_types.link,
+          val: "http://medium.com/@chrisstenson"
+        },
+        {
+          name : "minecraft",
+          type : fs_types.link,
+          val : "minecraft/map"
+        },
+{
+        name: "oldmc",
+        type: fs_types.link,
+        val: "minecraft/map2"
+},
+        {
+          name : "projects",
+          type : fs_types.link,
+          val : null
+        },
+        {
+          name : "about.txt",
+          type : fs_types.file,
+          val : "My name is Chris Stenson, a Seattle-area developer."
+        },
+        {
+          name : "footer.txt",
+          type : fs_types.file,
+          val : "Created and maintained by <a href=\"https://twitter.com/SerebroRaya\">Chris Stenson</a>."
+        },
+        {
+          name : "help.txt",
+          type : fs_types.file,
+          val : "Currently supported commands are 'ls', 'man', 'cat', 'clear', 'neofetch', and 'test'."
+        },
+        {
+          name : "site.txt",
+          type : fs_types.file,
+          val : "This site is a work in progress. Give it some time."
+        },
+      ];
+
+      var init = [
+        "ls",
+        "cat about.txt",
+        "cat site.txt",
+        "cat footer.txt"
+      ];
+
+      var cmds  = {
+        "" : {
+          output: function(args) {
+            return "";
+          }
+        },
+
+        "ls" : {
+          output : function(args) {
+            var out = "";
+
+            for (var i = 0, lim = fs.length, file; i < lim; i++)
+            {
+              file = fs[i];
+
+              if (file.type === fs_types.link)
+              {
+                if (file.val !== null) {
+                  out += (i === 0 ? "" : " ") + "<a href=\"" + file.val + "\">" + file.name + "/</a>";
+                } else {
+                  out += (i === 0 ? "" : " ") + file.name + "/";
+                }
+              }
+              else if (file.type === fs_types.file)
+              {
+                out += (i === 0 ? "" : " ") + file.name;
+              }
+            }
+
+            return out;
+          },
+          man : "Returns a listing of all items in the current directory."
+        },
+
+        "cat" : {
+          output: function(args) {
+            var out = "";
+            
+            for (var i = 1, lim = args.length, arg; i < lim; i++)
+            {
+              arg = args[i];
+
+              for (var j = 0, jLim = fs.length, file; j < jLim; j++)
+              {
+                file = fs[j];
+                if (file.type === fs_types.file && arg === file.name)
+                {
+                  out += (i === 1 ? "" : "<br>") + file.val;
+                }
+                else if (file.type === fs_types.link && arg === file.name)
+                {
+                  out += (i === 1 ? "" : "<br>") + "cat: " + file.name + ": Is a directory";
+                }
+              }
+            }
+
+            return out;
+          },
+          man: "Dumps the contents of the specified file(s) to the output buffer."
+        },
+
+        "man" : {
+          output: function(args) {
+            var out = "";
+            var cmd = args[1];
+
+            if (!cmd)
+            {
+              out = "What manual page do you want?"
+            }
+            else if (cmds[cmd])
+            {
+              out = cmds[cmd].man;
+            }
+            else
+            {
+              out = "No manual entry for " + args[1];
+            }
+
+            return out;
+          },
+          man: "Displays a manual for the requested command."
+        },
+
+        "invalid" : {
+          output : function(args) {
+            return "zsh: command not found: " + args[0];
+          }
+        },
+
+        "clear" : {
+          output : function(args) {
+            return function() {
+              $("#output").html("");
+            }
+          },
+          man : "Clears the buffer."
+        },
+
+        "test" : {
+          output : function(args) {
+            return "congratulations, you tested with a test and that test tested testily";
+          },
+          man : "Not a real test command, just for the lols really"
+        },
+
+        "neofetch" : {
+          output : function(args) {
+            var result;
+            result  = "#############################   visitor@chrisstenson.com" + "<br>";
+            result += "             ###                ----------------------------------" + "<br>";
+            result += "             ###                OS: fakeJavascriptOS 0.0.1 ES5" + "<br>";
+            result += "             ###                Model: WhateverYourBrowserRunsOn" + "<br>";
+            result += "             ###                Kernel: 0.0.1" + "<br>";
+            result += "             ###                Uptime: a few minutes<br>";
+            result += "             ###                Packages: " + Object.keys(cmds).length + "<br>";
+            result += "#############################   Shell: fakeZsh 0.0.1" + "<br>";
+            result += "             ###                Resolution: " + screen.width + "x" + screen.height + "<br>";
+            result += "             ###                DE: HTML+CSS+JS" + "<br>";
+            result += "             ###                WM: CSS" + "<br>";
+            result += "             ###                Terminal: fakeTerm2" + "<br>";
+            result += "             ###                CPU: Meh" + "<br>";
+            result += "             ###                GPU: Dunno" + "<br>";
+            result += "#############################   Memory: ?????MiB / ?????MiB" + "<br>";
+
+            return result;
+          },
+          man: "Easter egg :)"
+        },
+          
+        "rm" : {
+          output : function(args) {
+            return cmds["READ_ONLY"].output(args);
+          },
+
+          man : "Deletes the file or directory specified."
+        },
+
+        "READ_ONLY" : {
+          output : function(args) {
+            return "Error: read-only file system.";
+          },
+          man: null
+        }
+      }
+
+      function promptOnKey(event) {
+        var $prompt = $('#active-prompt');
+        if (event.which == 13) {
+          event.preventDefault();
+          prompt($prompt.val());
+          $prompt.val('');
+        }
+      }
+
+      function prompt(entry) {
+        var args = entry.split(" ");
+        var command = cmds[args[0]] ? cmds[args[0]] : cmds["invalid"];
+        var result = command.output(args);
+
+        publish(entry, result);
+      }
+
+      function publish(text_in, text_out) {
+        if (!!(text_out && text_out.constructor && text_out.call && text_out.apply)) {
+          // command was a special case and will handle everything
+          return text_out();
+        }
+
+        var top = "<span class=\"prompt\">visitor@chrisstenson.com</span>:<span class=\"prompt location\">~</span>$ " + text_in + "<br>";
+        var bottom = text_out ? text_out + "<br>" : "";
+        var $output = $('#output');
+
+        $output.html($output.html() + top + bottom);
+        $output.scrollTop($output[0].scrollHeight);
+      }
+    </script>
+  </html>
